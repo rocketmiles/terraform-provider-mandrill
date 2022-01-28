@@ -60,5 +60,7 @@ jobs:
       - run: go mod download
       - env:
           TF_ACC: "1"
+          MANDRILL_API_BASE_URL: "https://mandrillapp.com/api/1.0"
+          MANDRILL_API_KEY: ${{ secrets.MANDRILL_API_KEY }}
         run: go test -v -cover ./internal/provider/
         timeout-minutes: 10

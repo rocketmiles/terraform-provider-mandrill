@@ -1,3 +1,6 @@
+vendor
+*.jar
+*.out
 *.dll
 *.exe
 .DS_Store

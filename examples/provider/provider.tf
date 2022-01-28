@@ -1,3 +1,3 @@
-provider "scaffolding" {
-  # example configuration here
+provider "mandrill" {
+  api_key = "MANDRILL_API_KEY"
 }

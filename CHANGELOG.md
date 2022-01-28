@@ -1,3 +1,6 @@
-## 0.1.0 (Unreleased)
+## 1.0.0 - 2021-01-29
 
-FEATURES:
+Initial release.
+
+### Added 
+* mandrill_sending_domain resource

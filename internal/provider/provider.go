@@ -3,10 +3,12 @@ package provider
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/rocketmiles/terraform-provider-mandrill/internal/provider/mandrill"
 )
 
 // provider satisfies the tfsdk.Provider interface and usually is included
@@ -18,6 +20,7 @@ type provider struct {
 	//
 	// TODO: If appropriate, implement upstream provider SDK or HTTP client.
 	// client vendorsdk.ExampleClient
+	client mandrill.MandrillClient
 
 	// configured is set to true at the end of the Configure method.
 	// This can be used in Resource and DataSource implementations to verify
@@ -32,7 +35,8 @@ type provider struct {
 
 // providerData can be used to store data from the Terraform configuration.
 type providerData struct {
-	Example types.String `tfsdk:"example"`
+	ApiKey     types.String `tfsdk:"api_key"`
+	ApiBaseUrl types.String `tfsdk:"api_base_url"`
 }
 
 func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderRequest, resp *tfsdk.ConfigureProviderResponse) {
@@ -44,32 +48,59 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
 		return
 	}
 
-	// Configuration values are now available.
-	// if data.Example.Null { /* ... */ }
+	apiBaseUrl := ""
+	if os.Getenv("TF_ACC") != "" {
+		apiBaseUrl = os.Getenv("MANDRILL_API_BASE_URL")
+		if apiBaseUrl == "" {
+			apiBaseUrl = "http://localhost:8080/api/1.0"
+		}
+	} else {
+		apiBaseUrl = data.ApiBaseUrl.Value
+		if apiBaseUrl == "" {
+			apiBaseUrl = mandrill.DefaultApiBaseUrl
+		}
+	}
 
-	// If the upstream provider SDK or HTTP client requires configuration, such
-	// as authentication or logging, this is a great opportunity to do so.
+	apiKey := data.ApiKey.Value
+	if apiKey == "" {
+		apiKey = os.Getenv("MANDRILL_API_KEY")
+	}
+
+	client, err := mandrill.NewMandrillClient(apiKey, apiBaseUrl)
+
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error creating client",
+			err.Error(),
+		)
+		return
+	}
+
+	p.client = client
 
 	p.configured = true
 }
 
 func (p *provider) GetResources(ctx context.Context) (map[string]tfsdk.ResourceType, diag.Diagnostics) {
 	return map[string]tfsdk.ResourceType{
-		"scaffolding_example": exampleResourceType{},
+		"mandrill_sending_domain": sendingDomainResourceType{},
 	}, nil
 }
 
 func (p *provider) GetDataSources(ctx context.Context) (map[string]tfsdk.DataSourceType, diag.Diagnostics) {
-	return map[string]tfsdk.DataSourceType{
-		"scaffolding_example": exampleDataSourceType{},
-	}, nil
+	return map[string]tfsdk.DataSourceType{}, nil
 }
 
 func (p *provider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
-			"example": {
-				MarkdownDescription: "Example provider attribute",
+			"api_key": {
+				MarkdownDescription: "Mandrill API Key. Can be set using env variable MANDRILL_API_KEY. ",
+				Optional:            true,
+				Type:                types.StringType,
+			},
+			"api_base_url": {
+				MarkdownDescription: "Mandrill API Base URL",
 				Optional:            true,
 				Type:                types.StringType,
 			},
@@ -112,4 +143,8 @@ func convertProviderType(in tfsdk.Provider) (provider, diag.Diagnostics) {
 	}
 
 	return *p, diags
+}
+
+func GetClient() {
+
 }
