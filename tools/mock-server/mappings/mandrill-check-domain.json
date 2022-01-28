@@ -1,0 +1,18 @@
+{
+    "request": {
+        "method": "POST",
+        "url": "/api/1.0/senders/check-domain",
+        "bodyPatterns": [{
+          "matchesJsonPath" : "$.[?(@.key)]"
+        }]
+    },
+    "response": {
+      "status" : 200,
+      "body" : "{\"domain\": \"{{jsonPath request.body '$.domain'}}\",\r\n        \"created_at\": \"2019-08-24T14:15:22Z\",\r\n        \"last_tested_at\": \"2019-08-24T14:15:22Z\",\r\n        \"spf\": {\r\n          \"valid\": true,\r\n          \"valid_after\": \"2019-08-24T14:15:22Z\",\r\n          \"error\": \"string\"\r\n        },\r\n        \"dkim\": {\r\n          \"valid\": true,\r\n          \"valid_after\": \"2019-08-24T14:15:22Z\",\r\n          \"error\": \"string\"\r\n        },\r\n        \"verified_at\": \"2019-08-24T14:15:22Z\",\r\n        \"valid_signing\": true,\r\n        \"verify_txt_key\": \"LL4219A0xGM7dKAsgFRa4w\"\r\n}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+
+      "transformers": ["response-template"]
+  }
+}
