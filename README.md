@@ -43,9 +43,9 @@ go mod tidy
 
 Then commit the changes to `go.mod` and `go.sum`.
 
-## Using the provider
+## Using the provider locally
 
-Fill this in for each provider
+* Follow steps here: https://learn.hashicorp.com/tutorials/terraform/plugin-framework-create?in=terraform/providers#build-the-provider
 
 ## Developing the Provider
 
